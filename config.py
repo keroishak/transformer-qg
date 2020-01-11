@@ -5,10 +5,11 @@ class Config:
         self.train_ds_file = args.train_file
         self.dev_ds_file = args.dev_file
 
+        # BERT base model num_layers=12, d_model=768, num_heads=12
         #Constants
-        self.d_model = 128      # model vector dimension size
-        self.dff = 512          # feed-forward dense layer size
-        self.num_layers = 4
+        self.d_model = 256                   # model vector dimension size
+        self.dff = 4 * self.d_model          # feed-forward dense layer size (4*d_model)
+        self.num_layers = 8    
         self.num_heads = 8
         self.dropout_rate = 0.1
         self.target_sentence_max_len = 70
