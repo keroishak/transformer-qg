@@ -7,7 +7,7 @@ class Config:
         self.num_layers = 8    
         self.num_heads = 8
         self.dropout_rate = 0.1
-        self.target_sentence_max_len = 70
+        self.target_sentence_max_len = 100
 
         self.training_mode = training_mode
         if args != None:
