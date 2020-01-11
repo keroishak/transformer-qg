@@ -5,13 +5,13 @@ class Input():
     def __init__(self, config):
         self.EOS = 3
         self.train_ds = tf.data.TFRecordDataset([config.train_ds_file])
-        self.validate_ds = tf.data.TFRecordDataset([config.dev_ds_file])
+        self.dev_ds = tf.data.TFRecordDataset([config.dev_ds_file])
         self.train_ds = self.train_ds.map(self.__tf_encode)
-        self.validate_ds = self.validate_ds.map(self.__tf_encode)
+        self.dev_ds = self.dev_ds.map(self.__tf_encode)
         self.train_ds = self.train_ds.cache().padded_batch(config.batch_size, padded_shapes=([-1], [-1]))
         self.train_ds = self.train_ds.prefetch(tf.data.experimental.AUTOTUNE)
 
-        self.validate_ds = self.validate_ds.padded_batch(10, padded_shapes=([-1], [-1]))
+        self.dev_ds = self.dev_ds.padded_batch(config.batch_size, padded_shapes=([-1], [-1]))
 
         
         self.tokenizer = tfds.features.text.SubwordTextEncoder.load_from_file(config.subwords_file)
