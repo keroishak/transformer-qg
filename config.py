@@ -1,10 +1,5 @@
 class Config:
     def __init__(self, args, training_mode):
-        self.training_mode = training_mode
-        self.subwords_file = args.vocab_path
-        self.train_ds_file = args.train_file
-        self.dev_ds_file = args.dev_file
-
         # BERT base model num_layers=12, d_model=768, num_heads=12
         #Constants
         self.d_model = 256                   # model vector dimension size
@@ -14,9 +9,14 @@ class Config:
         self.dropout_rate = 0.1
         self.target_sentence_max_len = 70
 
-        self.epoch = args.epoch
-        self.batch_size = args.batch_size
+        self.training_mode = training_mode
+        if args != None:
+            self.subwords_file = args.vocab_path
+            self.train_ds_file = args.train_file
+            self.dev_ds_file = args.dev_file
+            self.epoch = args.epoch
+            self.batch_size = args.batch_size
 
-        self.checkpoint_dir = args.checkpoint_dir
-        self.summary_dir = args.summary_dir
-        self.restore = args.restore
+            self.checkpoint_dir = args.checkpoint_dir
+            self.summary_dir = args.summary_dir
+            self.restore = args.restore
