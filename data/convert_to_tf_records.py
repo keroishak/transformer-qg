@@ -10,7 +10,7 @@ def normalize_text(text):
     text = text.replace('-RRB-','')
     text = text.replace('-LRB-','')
     text = re.sub('[()\"#/@;:<>{}`+=~|!]_', '', text)
-    return text.lower()
+    return text.lower().strip()
 
 def _bytes_feature(value):
   """Returns a bytes_list from a string / byte."""
@@ -62,13 +62,13 @@ def convert_to_tf_records(input_file):
     training_examples = examples_numpy_arr[0:int(0.8*dataset_len)]
     validation_examples = examples_numpy_arr[int(0.8*dataset_len)::]
     splitted_input_file = input_file.split('/')
-    validation_output_file = '/'.join(splitted_input_file[0:len(splitted_input_file)-1]) + '/validation_dataset.tfrecord'
-    training_output_file = '/'.join(splitted_input_file[0:len(splitted_input_file)-1]) + '/training_dataset.tfrecord'
+    validation_output_file = '/'.join(splitted_input_file[0:len(splitted_input_file)-1]) + '/dev_dataset.tfrecord'
+    training_output_file = '/'.join(splitted_input_file[0:len(splitted_input_file)-1]) + '/train_dataset.tfrecord'
 
     write_tf_records(validation_examples, validation_output_file)
     write_tf_records(training_examples, training_output_file)
     
-    special_tokens=['<PAD>', '<SEP>', '<SOS>', '<EOS>']
+    special_tokens=['<PAD>', '<SEP>', '<SOS>', '<EOS>', '<ANS>']
     vocab_text=[]
     for row in training_examples:
             example = tf.train.Example()
