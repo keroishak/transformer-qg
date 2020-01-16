@@ -114,7 +114,7 @@ class TrainingManager:
     enc_padding_mask, combined_mask, dec_padding_mask = create_masks(inp, tar_inp)
     
     predictions, _ = self.transformer(inp, tar_inp, 
-                                True, 
+                                False, 
                                 enc_padding_mask, 
                                 combined_mask, 
                                 dec_padding_mask)
@@ -132,7 +132,7 @@ class TrainingManager:
         for inp, target in self.input.train_ds:
           self.train_step(inp, target)
           batch = batch + 1
-          if batch % 50 == 0:
+          if batch % 100 == 0:
             print ('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4%}'.format(
               epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
 
