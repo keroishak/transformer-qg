@@ -4,6 +4,7 @@ from transformer import Transformer
 from input import Input
 from config import Config
 import argparse
+import datetime
 
 def get_loss_function():
     return tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
@@ -56,9 +57,9 @@ class TrainingManager:
     self.config = config
     self.input = Input(config)
     learning_rate = CustomSchedule(self.config.d_model)
-    self.optimizer = tf.keras.optimizers.SGD(learning_rate)
-    # self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
-    #                                   epsilon=1e-9)
+    # self.optimizer = tf.keras.optimizers.SGD(learning_rate)
+    self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
+                                      epsilon=1e-9)
     self.train_loss = tf.keras.metrics.Mean(name='train_loss')
     self.train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(
           name='train_accuracy')
@@ -82,8 +83,11 @@ class TrainingManager:
     if self.ckpt_manager.latest_checkpoint and self.config.restore == True:
       ckpt.restore(self.ckpt_manager.latest_checkpoint)
       print ('Latest checkpoint restored!!')
-    self.summary_writer = tf.summary.create_file_writer(self.config.summary_dir)
-  
+    current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    train_log_dir = self.config.summary_dir + '/' + current_time + '/train'
+    dev_log_dir = self.config.summary_dir + '/' + current_time + '/dev'
+    self.train_summary_writer = tf.summary.create_file_writer(train_log_dir)
+    self.dev_summary_writer = tf.summary.create_file_writer(dev_log_dir)  
 
   @tf.function(input_signature=train_step_signature)
   def train_step(self, inp, tar):
@@ -124,35 +128,36 @@ class TrainingManager:
     self.dev_accuracy(tar_real, predictions)
 
   def train(self):
-    with self.summary_writer.as_default():
-      for epoch in range(self.config.epoch):
-        self.train_loss.reset_states()
-        self.train_accuracy.reset_states()
-        batch=0
-        for inp, target in self.input.train_ds:
-          self.train_step(inp, target)
-          batch = batch + 1
-          if batch % 100 == 0:
-            print ('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4%}'.format(
-              epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
+    for epoch in range(self.config.epoch):
+      self.train_loss.reset_states()
+      self.train_accuracy.reset_states()
+      batch=0
+      for inp, target in self.input.train_ds:
+        self.train_step(inp, target)
+        batch = batch + 1
+        if batch % 100 == 0:
+          print ('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4%}'.format(
+            epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
 
-        self.dev_loss.reset_states()
-        self.dev_accuracy.reset_states()
-        for inp, target in self.input.dev_ds:
-          self.dev_step(inp, target)
-
-        tf.summary.scalar("Dev Loss", self.dev_loss.result(), step=epoch)
-        tf.summary.scalar("Dev Accuracy", self.dev_accuracy.result(), step=epoch)
+      with self.train_summary_writer.as_default():
         tf.summary.scalar("Train Loss", self.train_loss.result(), step=epoch)
         tf.summary.scalar("Train Accuracy", self.train_accuracy.result(), step=epoch)
-        self.summary_writer.flush()
-        
-        print ('Epoch {} Dev Loss {:.4f} Dev Accuracy {:.4%}'.format(
-                      epoch + 1, self.dev_loss.result(), self.dev_accuracy.result()))
-        if (epoch + 1) % 5 == 0:
-            ckpt_save_path = self.ckpt_manager.save()
-            print ('Saving checkpoint for epoch {} at {}'.format(epoch+1,
-                                                                ckpt_save_path))
+
+      self.dev_loss.reset_states()
+      self.dev_accuracy.reset_states()
+      for inp, target in self.input.dev_ds:
+        self.dev_step(inp, target)
+
+      with self.dev_summary_writer.as_default():
+        tf.summary.scalar("Dev Loss", self.dev_loss.result(), step=epoch)
+        tf.summary.scalar("Dev Accuracy", self.dev_accuracy.result(), step=epoch)
+
+      print ('Epoch {} Dev Loss {:.4f} Dev Accuracy {:.4%}'.format(
+                    epoch + 1, self.dev_loss.result(), self.dev_accuracy.result()))
+      if (epoch + 1) % 5 == 0:
+          ckpt_save_path = self.ckpt_manager.save()
+          print ('Saving checkpoint for epoch {} at {}'.format(epoch+1,
+                                                              ckpt_save_path))
        
 
 if __name__=='__main__':
@@ -161,13 +166,17 @@ if __name__=='__main__':
   parser.add_argument('--train_file', type=str, help='path to the training TF-record dataset file', required=True)
   parser.add_argument('--dev_file', type=str, help='path to the development TF-record dataset file', required=True)
   parser.add_argument('--batch_size', type=int, default=64, help='batch size of training')
-  parser.add_argument('--epoch', type=int, default=20, help='number of epochs')
+  parser.add_argument('--epoch', type=int, default=30, help='number of epochs')
+  parser.add_argument('--d_model', type=int, default=512, help='model dimension')
+  parser.add_argument('--num_layers', type=int, default=6, help='number of stacked layers')
+  parser.add_argument('--num_heads', type=int, default=8, help='number of attention heads')
+  parser.add_argument('--dropout_rate', type=float, default=0.1, help='dropout rate')
   parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='dir path to save model(ex, ./checkpoint)')
   parser.add_argument('--restore', type=bool, default=False, help='boolean flag whether to restore the latest checkpoint or not')
   parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
   args = parser.parse_args()
 
-  config = Config(args, training_mode=True)
+  config = Config(args)
   trainingManager = TrainingManager(config)
   trainingManager.train()
 
