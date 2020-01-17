@@ -28,8 +28,3 @@ class Input():
 
     def __tf_encode(self, txt_record):
         return tf.py_function(self.encode, [txt_record], [tf.int64, tf.int64])
-
-if __name__=='__main__':
-    input = Input('./dataset/training_dataset.tfrecord', './dataset/validation_dataset.tfrecord')
-
-    
