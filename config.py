@@ -7,6 +7,7 @@ class Config:
         self.num_layers = args.num_layers    
         self.num_heads = args.num_heads
         self.dropout_rate = args.dropout_rate
+        self.warmup_steps = args.warmup_steps
         self.target_sentence_max_len = 100
         if args != None:
             self.subwords_file = args.vocab_path

@@ -56,7 +56,7 @@ class TrainingManager:
   def __init__(self, config):
     self.config = config
     self.input = Input(config)
-    learning_rate = CustomSchedule(self.config.d_model)
+    learning_rate = CustomSchedule(self.config.d_model, warmup_steps=self.config.warmup_steps)
     # self.optimizer = tf.keras.optimizers.SGD(learning_rate)
     self.optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.98, 
                                       epsilon=1e-9)
@@ -140,8 +140,9 @@ class TrainingManager:
             epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
 
       with self.train_summary_writer.as_default():
-        tf.summary.scalar("Train Loss", self.train_loss.result(), step=epoch)
-        tf.summary.scalar("Train Accuracy", self.train_accuracy.result(), step=epoch)
+        tf.summary.histogram("Train Loss", self.train_loss.result(), step=epoch)
+        tf.summary.histogram("Train Accuracy", self.train_accuracy.result(), step=epoch)
+        # tf.summary.histogram("LR", self.learning_rate.lr, step=epoch)
 
       self.dev_loss.reset_states()
       self.dev_accuracy.reset_states()
@@ -149,8 +150,8 @@ class TrainingManager:
         self.dev_step(inp, target)
 
       with self.dev_summary_writer.as_default():
-        tf.summary.scalar("Dev Loss", self.dev_loss.result(), step=epoch)
-        tf.summary.scalar("Dev Accuracy", self.dev_accuracy.result(), step=epoch)
+        tf.summary.histogram("Dev Loss", self.dev_loss.result(), step=epoch)
+        tf.summary.histogram("Dev Accuracy", self.dev_accuracy.result(), step=epoch)
 
       print ('Epoch {} Dev Loss {:.4f} Dev Accuracy {:.4%}'.format(
                     epoch + 1, self.dev_loss.result(), self.dev_accuracy.result()))
@@ -171,6 +172,7 @@ if __name__=='__main__':
   parser.add_argument('--num_layers', type=int, default=6, help='number of stacked layers')
   parser.add_argument('--num_heads', type=int, default=8, help='number of attention heads')
   parser.add_argument('--dropout_rate', type=float, default=0.1, help='dropout rate')
+  parser.add_argument('--warmup_steps', type=int, default=4000, help='warmup steps')
   parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='dir path to save model(ex, ./checkpoint)')
   parser.add_argument('--restore', type=bool, default=False, help='boolean flag whether to restore the latest checkpoint or not')
   parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
