@@ -24,7 +24,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         x = tf.reshape(x, (batch_size, -1, self.num_heads, self.depth))
         return tf.transpose(x, perm=[0, 2, 1, 3])
         
-    def call(self, v, k, q, mask):
+    def call(self, v, k, q, mask, t):
         batch_size = tf.shape(q)[0]
         
         q = self.wq(q)  # (batch_size, seq_len, d_model)
@@ -38,7 +38,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
         # scaled_attention.shape == (batch_size, num_heads, seq_len_q, depth)
         # attention_weights.shape == (batch_size, num_heads, seq_len_q, seq_len_k)
         scaled_attention, attention_weights = scaled_dot_product_attention(
-            q, k, v, mask)
+            q, k, v, mask, t)
         
         scaled_attention = tf.transpose(scaled_attention, perm=[0, 2, 1, 3])  # (batch_size, seq_len_q, num_heads, depth)
 

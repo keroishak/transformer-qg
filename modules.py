@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-def scaled_dot_product_attention(q, k, v, mask):
+def scaled_dot_product_attention(q, k, v, mask, t=1):
     """Calculate the attention weights.
     q, k, v must have matching leading dimensions.
     k, v must have matching penultimate dimension, i.e.: seq_len_k = seq_len_v.
@@ -14,6 +14,7 @@ def scaled_dot_product_attention(q, k, v, mask):
         v: value shape == (..., seq_len_v, depth_v)
         mask: Float tensor with shape broadcastable 
             to (..., seq_len_q, seq_len_k). Defaults to None.
+        t: value to represent temperature to the softmax    
         
     Returns:
         output, attention_weights
@@ -31,7 +32,8 @@ def scaled_dot_product_attention(q, k, v, mask):
 
     # softmax is normalized on the last axis (seq_len_k) so that the scores
     # add up to 1.
-    attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
+    tempreture_scaled_attention_logits = scaled_attention_logits / t
+    attention_weights = tf.nn.softmax(tempreture_scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
 
     output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
 

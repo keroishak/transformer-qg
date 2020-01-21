@@ -101,7 +101,8 @@ class TrainingManager:
                                   True, 
                                   enc_padding_mask, 
                                   combined_mask, 
-                                  dec_padding_mask)
+                                  dec_padding_mask,
+                                  self.config.temperature)
       loss = calculate_loss(tar_real, predictions)
 
     gradients = tape.gradient(loss, self.transformer.trainable_variables)    
@@ -140,8 +141,8 @@ class TrainingManager:
             epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
 
       with self.train_summary_writer.as_default():
-        tf.summary.histogram("Train Loss", self.train_loss.result(), step=epoch)
-        tf.summary.histogram("Train Accuracy", self.train_accuracy.result(), step=epoch)
+        tf.summary.histogram("Train Loss", self.train_loss.result(), step=epoch+1)
+        tf.summary.histogram("Train Accuracy", self.train_accuracy.result(), step=epoch+1)
         # tf.summary.histogram("LR", self.learning_rate.lr, step=epoch)
 
       self.dev_loss.reset_states()
@@ -150,8 +151,8 @@ class TrainingManager:
         self.dev_step(inp, target)
 
       with self.dev_summary_writer.as_default():
-        tf.summary.histogram("Dev Loss", self.dev_loss.result(), step=epoch)
-        tf.summary.histogram("Dev Accuracy", self.dev_accuracy.result(), step=epoch)
+        tf.summary.histogram("Dev Loss", self.dev_loss.result(), step=epoch+1)
+        tf.summary.histogram("Dev Accuracy", self.dev_accuracy.result(), step=epoch+1)
 
       print ('Epoch {} Dev Loss {:.4f} Dev Accuracy {:.4%}'.format(
                     epoch + 1, self.dev_loss.result(), self.dev_accuracy.result()))
@@ -173,6 +174,7 @@ if __name__=='__main__':
   parser.add_argument('--num_heads', type=int, default=8, help='number of attention heads')
   parser.add_argument('--dropout_rate', type=float, default=0.1, help='dropout rate')
   parser.add_argument('--warmup_steps', type=int, default=4000, help='warmup steps')
+  parser.add_argument('--temperature', type=float, default=0.6, help='softmax temperature value')
   parser.add_argument('--checkpoint_dir', type=str, default='./checkpoint', help='dir path to save model(ex, ./checkpoint)')
   parser.add_argument('--restore', type=bool, default=False, help='boolean flag whether to restore the latest checkpoint or not')
   parser.add_argument('--summary_dir', type=str, default='./runs', help='path to save summary(ex, ./runs)')
