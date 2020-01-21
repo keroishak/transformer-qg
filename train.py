@@ -122,7 +122,8 @@ class TrainingManager:
                                 False, 
                                 enc_padding_mask, 
                                 combined_mask, 
-                                dec_padding_mask)
+                                dec_padding_mask,
+                                self.config.temperature)
     loss = calculate_loss(tar_real, predictions)
     
     self.dev_loss(loss)

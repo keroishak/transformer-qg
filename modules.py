@@ -32,8 +32,8 @@ def scaled_dot_product_attention(q, k, v, mask, t=1):
 
     # softmax is normalized on the last axis (seq_len_k) so that the scores
     # add up to 1.
-    tempreture_scaled_attention_logits = scaled_attention_logits / t
-    attention_weights = tf.nn.softmax(tempreture_scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
+    temperature_scaled_attention_logits = scaled_attention_logits / t
+    attention_weights = tf.nn.softmax(temperature_scaled_attention_logits, axis=-1)  # (..., seq_len_q, seq_len_k)
 
     output = tf.matmul(attention_weights, v)  # (..., seq_len_q, depth_v)
 
