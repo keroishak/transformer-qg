@@ -142,8 +142,8 @@ class TrainingManager:
             epoch + 1, batch, self.train_loss.result(), self.train_accuracy.result()))  
 
       with self.train_summary_writer.as_default():
-        tf.summary.histogram("Train Loss", self.train_loss.result(), step=epoch+1)
-        tf.summary.histogram("Train Accuracy", self.train_accuracy.result(), step=epoch+1)
+        tf.summary.scalar("Train Loss", self.train_loss.result(), step=epoch+1)
+        tf.summary.scalar("Train Accuracy", self.train_accuracy.result(), step=epoch+1)
         # tf.summary.histogram("LR", self.learning_rate.lr, step=epoch)
 
       self.dev_loss.reset_states()
@@ -152,8 +152,8 @@ class TrainingManager:
         self.dev_step(inp, target)
 
       with self.dev_summary_writer.as_default():
-        tf.summary.histogram("Dev Loss", self.dev_loss.result(), step=epoch+1)
-        tf.summary.histogram("Dev Accuracy", self.dev_accuracy.result(), step=epoch+1)
+        tf.summary.scalar("Dev Loss", self.dev_loss.result(), step=epoch+1)
+        tf.summary.scalar("Dev Accuracy", self.dev_accuracy.result(), step=epoch+1)
 
       print ('Epoch {} Dev Loss {:.4f} Dev Accuracy {:.4%}'.format(
                     epoch + 1, self.dev_loss.result(), self.dev_accuracy.result()))
