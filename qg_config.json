@@ -1,0 +1,24 @@
+{
+    "hidden_dropout_prob": 0.1,
+    "hidden_size": 768,
+    "initializer_range": 0.02,
+    "intermediate_size": 3072,
+    "max_position_embeddings": 768,
+    "num_attention_heads": 12,
+    "num_hidden_layers": 6,
+    "type_vocab_size": 2,
+    "vocab_size": 30522,
+    "answer_token_type_size": 2,
+    "epochs": 50,
+    "batch_size": 30,
+    "warmup_steps": 8000,
+    "decay_steps": 8200,
+    "train_ds_file": "data/train_dataset.tfrecord",
+    "dev_ds_file": "data/dev_dataset.tfrecord",
+    "test_ds_file": "data/test_dataset.tfrecord",
+    "checkpoint_path": "checkpoint/transformer_qg.ckpt",
+    "summary_dir": "runs",
+    "bert_dir": "../BERT/uncased_L-12_H-768_A-12/",
+    "restore": false
+  }
+  
