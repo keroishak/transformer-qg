@@ -23,8 +23,9 @@ class Input():
                                        '/vocab.txt')
 
     def encode(self, txt_record):
-        example = tf.train.Example()
-        example.ParseFromString(txt_record.numpy())
+        # example = tf.train.Example()
+        # example.ParseFromString(txt_record.numpy())
+        example = tf.train.Example.FromString(txt_record.numpy())
         paragraph = example.features.feature['paragraph'].bytes_list.value[
             0].decode('utf-8').split(' ')
         answer = example.features.feature['answer'].bytes_list.value[0].decode(
