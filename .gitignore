@@ -32,7 +32,6 @@ venv.bak/
 #QG Model
 runs
 *.tfrecord
-*.json
 
 .DS_Store
 checkpoint/
