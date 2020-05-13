@@ -19,7 +19,7 @@ nlp = spacy.load("en_core_web_sm")
 def normalize_text(text):
     text = text.replace('-RRB-', '')
     text = text.replace('-LRB-', '')
-    text = re.sub("[\\[#|/@;:<>{}`+=~\!\\]_]", '<>', text)
+    text = re.sub("[\\[|\"|#|/|@|;|:|<|>|{|}|`|+|=|~\||!|]|_|\\]", '<>', text)
     index = text.find('<>')
     # the following postprocessing to handle cases like "here i'm ....."
     while index > -1:
@@ -42,9 +42,6 @@ def _bytes_feature(value):
 
 def _int64_feature(value):
     """Returns a int64_list from a int."""
-    if isinstance(value, type(tf.constant(0))):
-        value = value.numpy(
-        )  # BytesList won't unpack a string from an EagerTensor.
     return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
 
@@ -58,7 +55,7 @@ def serialize_example(paragraph, answer, question, answer_start_idx):
         'paragraph': _bytes_feature(paragraph.encode()),
         'answer': _bytes_feature(answer.encode()),
         'question': _bytes_feature(question.encode()),
-        'answer_start_idx': _int64_feature(answer_start_idx)
+        'answer_start_idx': _bytes_feature(str(answer_start_idx).encode())
     }
 
     # Create a Features message using tf.train.Example.
