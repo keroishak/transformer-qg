@@ -148,7 +148,7 @@ class TrainingManager:
             for inp, answer_mask, target in self.input.train_ds:
                 self.train_step(inp, answer_mask, target)
                 batch = batch + 1
-                if batch % 500 == 0:
+                if batch % 100 == 0:
                     print(
                         'Epoch {} Batch {} Loss {:.4f} Accuracy {:.4%}'.format(
                             epoch + 1, batch, self.train_loss.result(),
